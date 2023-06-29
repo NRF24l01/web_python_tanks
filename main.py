@@ -1,7 +1,16 @@
 import random
+from typing import List
 
 
-def generate_field(player_count, coin_count, size_x, size_y):
+def generate_field(player_count: int, coin_count: int, size_x: int, size_y: int) -> list[list[int]]:
+    """
+
+    :param player_count: count of players on field
+    :param coin_count: count of coins
+    :param size_x: x size
+    :param size_y: y size
+    :return: list with list`s
+    """
     field = [[0] * size_y for _ in range(size_x)]  # Создаем пустое поле
 
     # Расставляем монеты
@@ -36,9 +45,10 @@ def print_field(field: list):
     for i in field:
         txt = ""
         for j in i:
-            txt = txt +str(j) + " "
+            txt = txt + str(j) + " "
         print(txt)
 
 
-field = generate_field(2, 10, 10, 10)
-print_field(field)
+if __name__ == "__main__":
+    field = generate_field(2, 10, 10, 10)
+    print_field(field)
