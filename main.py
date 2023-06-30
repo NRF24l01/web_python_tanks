@@ -1,54 +1,54 @@
-import random
-from typing import List
+from flask import Flask, render_template, jsonify
+from helpers import generate_field, check_field, print_field
+from config import host, port
 
 
-def generate_field(player_count: int, coin_count: int, size_x: int, size_y: int) -> list[list[int]]:
-    """
+app = Flask(__name__)
 
-    :param player_count: count of players on field
-    :param coin_count: count of coins
-    :param size_x: x size
-    :param size_y: y size
-    :return: list with list`s
-    """
-    field = [[0] * size_y for _ in range(size_x)]  # Создаем пустое поле
+# Загружаем ваш массив из API
+def load_array_from_api():
+    # Здесь должен быть ваш код для получения массива с сервера по API
+    # Возвращаем заглушку для примера
+    field = generate_field(2, 10, 10 ,10)
+    res = check_field(field)
+    print_field(res[1])
+    print(res[0])
+    return res[1]
 
-    # Расставляем монеты
-    for _ in range(coin_count):
-        x = random.randint(0, size_x - 1)
-        y = random.randint(0, size_y - 1)
-        field[x][y] = 1
+# Здесь должна быть логика для получения начального состояния игры
+# Например, можно определить функцию get_initial_game_state() и вызвать её внутри /state
+def get_initial_game_state():
+    return [
+        ['#', '#', '#', '#', '#'],
+        ['#', '.', '.', '.', '#'],
+        ['#', '.', '@', '.', '#'],
+        ['#', '.', '.', '.', '#'],
+        ['#', '#', '#', '#', '#']
+    ]
 
-    # Расставляем стены
-    wall_count = (size_x * size_y) // 4  # Вычисляем количество стен пропорционально размеру поля
-    for _ in range(wall_count):
-        x = random.randint(0, size_x - 1)
-        y = random.randint(0, size_y - 1)
-        while field[x][y] != 0:  # Проверяем, что место для стены свободно
-            x = random.randint(0, size_x - 1)
-            y = random.randint(0, size_y - 1)
-        field[x][y] = -1
+# Обработка запроса на получение состояния игры
+@app.route('/state', methods=['GET'])
+def get_game_state():
+    # Здесь должна быть логика для получения текущего состояния игры
+    # Например, можно определить функцию get_current_game_state() и вызвать её вместо get_initial_game_state()
+    current_state = get_initial_game_state()
 
-    # Расставляем игроков
-    for i in range(player_count):
-        x = random.randint(0, size_x - 1)
-        y = random.randint(0, size_y - 1)
-        while field[x][y] != 0:  # Проверяем, что место для игрока свободно
-            x = random.randint(0, size_x - 1)
-            y = random.randint(0, size_y - 1)
-        field[x][y] = 5
+    # Возвращаем состояние игры в формате JSON
+    return jsonify(current_state)
 
-    return field
+# Генерируем HTML-страницу с помощью шаблона
+@app.route('/')
+def index():
+    # array = load_array_from_api()
+    # rows = len(array)
+    # cols = len(array[0])
+    return render_template('index.html')
 
+# API endpoint для получения обновленного массива
+@app.route('/api/array')
+def get_array():
+    array = load_array_from_api()
+    return jsonify(array=array)
 
-def print_field(field: list):
-    for i in field:
-        txt = ""
-        for j in i:
-            txt = txt + str(j) + " "
-        print(txt)
-
-
-if __name__ == "__main__":
-    field = generate_field(2, 10, 10, 10)
-    print_field(field)
+if __name__ == '__main__':
+    app.run(debug=True, port=port, host=host)
